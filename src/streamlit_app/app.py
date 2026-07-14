@@ -1,6 +1,6 @@
 import streamlit as st 
 import pandas as pd 
-from ..services.db.DatabaseManager import DatabaseManager
+from src.services.db import DatabaseManager
 
 database_manager = DatabaseManager()
 
