@@ -1,12 +1,10 @@
 import os, sys
-_here = os.path.dirname(os.path.abspath(__file__))  
-_src  = os.path.abspath(os.path.join(_here, ".."));     sys.path.insert(0, _here);          sys.path.insert(0, _src)           
+          
 import pymysql 
 from dotenv import load_dotenv; load_dotenv()
 import os 
 from logging import getLogger
 
-# cd src && python -m streamlit run streamlit_app/app.py
 
 class DatabaseManager:
 
@@ -39,18 +37,25 @@ class DatabaseManager:
         self.my_cursor.execute(F"USE {self.database_name}")
         self.my_cursor.execute(f"CREATE TABLE IF NOT EXISTS {self.table_name} ( id INT AUTO_INCREMENT PRIMARY KEY, username VARCHAR(20), password VARCHAR(10), email VARCHAR(50));")    
         self.conn.commit()
-        self.logger.info(f"created database {self.database_name} & created table {self.table_name} successfully !")
+        self.logger.warning(f"created database {self.database_name} & created table {self.table_name} successfully !")
 
     def fetch_data(self,limit: int=None):
-        self.my_cursor.execute("SELECT * FROM users ")
+        self.my_cursor.execute("SELECT * FROM users;")
         data = self.my_cursor.fetchmany(size=limit)
         return data
     
 
+    def insert_into_users_table(self,username:str,password:str,email:str): 
 
+        self.my_cursor.execute("SELECT * FROM users where username = %s AND password = %s AND email = %s", 
+                               args=[username,password,email] )
+        data = self.my_cursor.fetchone()
 
-
-
-
+        if data is None:
+            self.my_cursor.execute(F"INSERT INTO {self.table_name} (username,password,email) VALUES (%s,%s,%s)",
+                                args=[username,password,email])
+            self.conn.commit()
+            self.logger.warning("data inserted ssuccessfully")
+        
 
 
